@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: streamify-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node src/server.js
+    plan: free
+    branch: main
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: STREAM_API_KEY
+        sync: false
+      - key: STREAM_API_SECRET
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: CLIENT_URL
+        sync: false
