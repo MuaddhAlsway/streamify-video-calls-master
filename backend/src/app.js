@@ -24,13 +24,23 @@ const allowedOrigins = [
   "https://streamify-video-calls-master-eu9e.vercel.app",
 ].filter(Boolean).map((origin) => origin.replace(/\/$/, ""));
 
+// Vercel preview deployments of this project (e.g. ...-eu9e-1a1uri7bn.vercel.app)
+const allowedOriginPatterns = [
+  /^https:\/\/streamify-video-calls-master(-[a-z0-9]+)*\.vercel\.app$/,
+];
+
+const isAllowedOrigin = (origin) => {
+  const cleanOrigin = origin.replace(/\/$/, "");
+  return (
+    allowedOrigins.includes(cleanOrigin) ||
+    allowedOriginPatterns.some((pattern) => pattern.test(cleanOrigin))
+  );
+};
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin) {
-    const cleanOrigin = origin.replace(/\/$/, "");
-    if (allowedOrigins.includes(cleanOrigin)) {
-      res.setHeader("Access-Control-Allow-Origin", cleanOrigin);
-    }
+  if (origin && isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin.replace(/\/$/, ""));
   }
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
