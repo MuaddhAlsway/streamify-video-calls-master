@@ -31,17 +31,11 @@ app.use((req, res, next) => {
     const cleanOrigin = origin.replace(/\/$/, "");
     if (allowedOrigins.includes(cleanOrigin)) {
       res.setHeader("Access-Control-Allow-Origin", cleanOrigin);
-      res.setHeader("Access-Control-Allow-Credentials", "true");
-    } else {
-      res.setHeader("Access-Control-Allow-Origin", allowedOrigins[allowedOrigins.length - 1] || origin);
-      res.setHeader("Access-Control-Allow-Credentials", "true");
     }
-  } else {
-    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[allowedOrigins.length - 1] || "*");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
   }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, X-Requested-With");
   res.setHeader("Access-Control-Max-Age", "86400");
   if (req.method === "OPTIONS") {
     return res.status(204).end();
