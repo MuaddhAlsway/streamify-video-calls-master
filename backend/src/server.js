@@ -22,22 +22,32 @@ const PORT = process.env.PORT || 5001;
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.CLIENT_URL,
+  "https://streamify-video-calls-master-eu9e.vercel.app",
 ].filter(Boolean).map((origin) => origin.replace(/\/$/, ""));
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    const cleanOrigin = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(cleanOrigin)) {
+      res.setHeader("Access-Control-Allow-Origin", cleanOrigin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+    } else {
+      res.setHeader("Access-Control-Allow-Origin", allowedOrigins[allowedOrigins.length - 1] || origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[allowedOrigins.length - 1] || "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept");
+  res.setHeader("Access-Control-Max-Age", "86400");
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  next();
+});
 
 // ==========================================
 // Middleware
