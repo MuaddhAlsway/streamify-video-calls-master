@@ -47,7 +47,7 @@ const LoginPage = () => {
           {/* ERROR MESSAGE DISPLAY */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{error?.response?.data?.message || error?.message || "Something went wrong"}</span>
             </div>
           )}
 
@@ -70,6 +70,7 @@ const LoginPage = () => {
                       type="email"
                       placeholder="hello@example.com"
                       className="input input-bordered w-full"
+                      autoComplete="email"
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       required
@@ -82,8 +83,9 @@ const LoginPage = () => {
                     </label>
                     <input
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="********"
                       className="input input-bordered w-full"
+                      autoComplete="current-password"
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required

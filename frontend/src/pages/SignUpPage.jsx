@@ -49,7 +49,7 @@ const SignUpPage = () => {
           {/* ERROR MESSAGE IF ANY */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{error?.response?.data?.message || error?.message || "Something went wrong"}</span>
             </div>
           )}
 
@@ -73,6 +73,7 @@ const SignUpPage = () => {
                       type="text"
                       placeholder="John Doe"
                       className="input input-bordered w-full"
+                      autoComplete="name"
                       value={signupData.fullName}
                       onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
                       required
@@ -87,6 +88,7 @@ const SignUpPage = () => {
                       type="email"
                       placeholder="john@gmail.com"
                       className="input input-bordered w-full"
+                      autoComplete="email"
                       value={signupData.email}
                       onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                       required
@@ -101,6 +103,7 @@ const SignUpPage = () => {
                       type="password"
                       placeholder="********"
                       className="input input-bordered w-full"
+                      autoComplete="new-password"
                       value={signupData.password}
                       onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                       required
