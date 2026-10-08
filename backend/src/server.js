@@ -17,15 +17,31 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // ==========================================
-// Middleware
+// CORS Configuration
 // ==========================================
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.CLIENT_URL,
+].filter(Boolean).map((origin) => origin.replace(/\/$/, ""));
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// ==========================================
+// Middleware
+// ==========================================
 app.use(express.json());
 app.use(cookieParser());
 
@@ -62,6 +78,7 @@ app.use(async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Database connection failed:", error.message);
+
     res.status(503).json({
       success: false,
       message: "Database unavailable",
