@@ -1,8 +1,6 @@
 ﻿
 import "dotenv/config";
 import express from "express";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -11,12 +9,6 @@ import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
 
 import { connectDB } from "./lib/db.js";
-
-// ==========================================
-// Directory Configuration
-// ==========================================
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ==========================================
 // Express Configuration
@@ -29,13 +21,53 @@ const PORT = process.env.PORT || 5001;
 // ==========================================
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
+
+// ==========================================
+// Health Check Routes
+// ==========================================
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "MUSTREAMIFY Backend is running",
+  });
+});
+
+app.get("/api", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "MUSTREAMIFY API is running",
+  });
+});
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    service: "MUSTREAMIFY Backend",
+  });
+});
+
+// ==========================================
+// Database Middleware
+// ==========================================
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    res.status(503).json({
+      success: false,
+      message: "Database unavailable",
+    });
+  }
+});
 
 // ==========================================
 // API Routes
@@ -45,40 +77,15 @@ app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
 // ==========================================
-// Production Configuration
+// Local Development
 // ==========================================
-if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.resolve(__dirname, "../../frontend/dist");
-
-  app.use(express.static(frontendPath));
-
-  app.get("/{*path}", (req, res) => {
-    res.sendFile(path.join(frontendPath, "index.html"));
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
 }
 
 // ==========================================
-// Start Server
+// Export for Vercel
 // ==========================================
-const startServer = async () => {
-  try {
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing");
-    }
-
-    if (!process.env.STREAM_API_KEY || !process.env.STREAM_API_SECRET) {
-      throw new Error("Stream API key or secret is missing");
-    }
-
-    await connectDB();
-
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error.message);
-    process.exit(1);
-  }
-};
-
-startServer();
+export default app;
